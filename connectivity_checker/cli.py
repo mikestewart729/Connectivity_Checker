@@ -2,8 +2,6 @@
 
 import argparse
 
-from matplotlib.cbook import strip_math
-
 def read_user_cli_args():
     """
     Handle the user CLI arguments and options.
