@@ -1,8 +1,9 @@
 # connectivity_checker/checker.py
 
+import asyncio
 from http.client import HTTPConnection
-from tkinter import E
 from urllib.parse import urlparse
+import aiohttp
 
 def site_is_online(url, timeout=2):
     """
@@ -22,4 +23,25 @@ def site_is_online(url, timeout=2):
             error = e
         finally:
             connection.close()
+    raise error
+
+async def site_is_online_async(url, timeout=2):
+    """
+    Return TRUE if the site at url is online.
+
+    Otherwise, raise an exception.
+    """
+    error = Exception("unknown error")
+    parser = urlparse(url)
+    host = parser.netloc or parser.path.split("/")[0]
+    for scheme in ("http", "https"):
+        target_url = scheme + "://" + host
+        async with aiohttp.ClientSession() as session:
+            try:
+                await session.head(target_url, timeout=timeout)
+                return True
+            except asyncio.exceptions.TimeoutError:
+                error = Exception("timed out")
+            except Exception as e:
+                error = e
     raise error
